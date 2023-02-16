@@ -449,6 +449,7 @@ const deleteFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     succes: true,
+    favouriteItems: USER.favouriteItems,
     message: "Favourite item deleted Successfully..",
   });
 });
