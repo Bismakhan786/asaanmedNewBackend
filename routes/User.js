@@ -35,8 +35,7 @@ router
   .route("/favourites/:id")
   .get(getFavouriteItemsOfUser)
   .delete(deleteAllFavouriteItemsOfUser); // id = user id
-router.route("/favourites/add/:id").post(insertFavouriteItemOfUser); // id = user id
-router.route("/favourites/remove/:id").post(deleteFavouriteItemOfUser); // id = user.id
+router.route("/favourites/item/:id").post(insertFavouriteItemOfUser).put(deleteFavouriteItemOfUser); // id = user id
 
 // ADDRESS BOOK OF USER
 router
