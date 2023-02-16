@@ -437,7 +437,7 @@ const deleteFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
   const favouriteItems = USER.favouriteItems.filter(
     (item) => item.id.toString() !== productId.toString()
   );
-  await USER.findByIdAndUpdate(
+  await User.findByIdAndUpdate(
     req.params.id,
     { favouriteItems },
     {
