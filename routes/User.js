@@ -35,15 +35,18 @@ router
   .route("/favourites/:id")
   .get(getFavouriteItemsOfUser)
   .delete(deleteAllFavouriteItemsOfUser); // id = user id
-router
-  .route("/favourites/item/:id")
-  .delete(deleteFavouriteItemOfUser)
-  .post(insertFavouriteItemOfUser); // id = user id
+router.route("/favourites/add/:id").post(insertFavouriteItemOfUser); // id = user id
+router.route("/favourites/remove/:id").post(deleteFavouriteItemOfUser); // id = user.id
 
 // ADDRESS BOOK OF USER
-router.route("/address/:id").get(getAllAddressesOfUser).delete(deleteAllAddressesOfUser) // id = user id
-router.route("/address/single/:id").delete(deleteAddressOfUser).post(insertAddressOfUser) // id = user  id
-
+router
+  .route("/address/:id")
+  .get(getAllAddressesOfUser)
+  .delete(deleteAllAddressesOfUser); // id = user id
+router
+  .route("/address/single/:id")
+  .delete(deleteAddressOfUser)
+  .post(insertAddressOfUser); // id = user  id
 
 // SAMPLE ID 6325469dc94fdf4ba95a383f
 
