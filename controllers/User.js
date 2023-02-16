@@ -434,10 +434,10 @@ const deleteFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("User does not exist", 400));
   }
 
-  const favouriteItems = User.favouriteItems.filter(
+  const favouriteItems = USER.favouriteItems.filter(
     (item) => item.id.toString() !== productId.toString()
   );
-  await User.findByIdAndUpdate(
+  await USER.findByIdAndUpdate(
     req.params.id,
     { favouriteItems },
     {
