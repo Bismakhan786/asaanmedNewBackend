@@ -7,6 +7,10 @@ const OrdersSchema = new Schema({
       type: String,
       required: true,
     },
+    floorOrApartment: {
+      type: String,
+      default: null
+    },
     city: {
       type: String,
       required: true,
