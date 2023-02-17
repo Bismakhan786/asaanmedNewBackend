@@ -489,7 +489,7 @@ const getAllAddressesOfUser = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-// UPDATE
+// ADD NEW ADDRESS
 const insertAddressOfUser = catchAsyncErrors(async (req, res, next) => {
   const newAddress = {
     streetAddress: req.body.streetAddress,
@@ -509,6 +509,44 @@ const insertAddressOfUser = catchAsyncErrors(async (req, res, next) => {
   res.status(200).json({
     succes: true,
     addressBook: USER.addressBook,
+  });
+});
+
+// UPDATE SINGLE ADDRESS
+const updateAddressOfUser = catchAsyncErrors(async (req, res, next) => {
+  const { addressId } = req.body;
+  const newAddress = {
+    streetAddress: req.body.streetAddress,
+    floorOrApartment: req.body.floorOrApartment,
+    city: req.body.city,
+    postalCode: req.body.postalCode,
+  };
+
+  const USER = await User.findById(req.params.id);
+  if (!USER) {
+    return next(new ErrorHandler("User does not exist", 400));
+  }
+
+  let index = USER.addressBook.findIndex(addr => addr.id.toString() === addressId.toString())
+  let addressBook = USER.addressBook.slice()
+  addressBook.splice(index, 1, newAddress)
+
+  await User.findByIdAndUpdate(
+    req.params.id,
+    { addressBook },
+    {
+      new: true,
+      runValidators: true,
+      useFindAndModify: false,
+    }
+  );
+
+  const updatedUser = await User.findById(req.params.id).populate("favouriteItems.productId")
+  const updatedAddressBook = updatedUser.addressBook
+  res.status(200).json({
+    succes: true,
+    addressBook: updatedAddressBook,
+    message: "Address UPDATED Successfully..",
   });
 });
 
@@ -584,5 +622,6 @@ module.exports = {
   getAllAddressesOfUser,
   deleteAddressOfUser,
   insertAddressOfUser,
+  updateAddressOfUser,
   deleteAllAddressesOfUser,
 };

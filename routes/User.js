@@ -16,6 +16,7 @@ const {
   insertFavouriteItemOfUser,
   deleteAddressOfUser,
   insertAddressOfUser,
+  updateAddressOfUser,
 } = require("../controllers/User");
 const router = express.Router();
 
@@ -47,6 +48,7 @@ router
   .put(deleteAddressOfUser)
   .post(insertAddressOfUser); // id = user  id
 
+  router.route("/address/single/update/:id").put(updateAddressOfUser)
 // SAMPLE ID 6325469dc94fdf4ba95a383f
 
 module.exports = router;
