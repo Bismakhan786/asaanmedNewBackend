@@ -44,7 +44,7 @@ router
   .delete(deleteAllAddressesOfUser); // id = user id
 router
   .route("/address/single/:id")
-  .delete(deleteAddressOfUser)
+  .put(deleteAddressOfUser)
   .post(insertAddressOfUser); // id = user  id
 
 // SAMPLE ID 6325469dc94fdf4ba95a383f

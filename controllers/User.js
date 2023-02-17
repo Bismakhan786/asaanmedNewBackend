@@ -447,9 +447,11 @@ const deleteFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
+  const updatedUser = await User.findById(req.params.id).populate("favouriteItems.productId")
+  const updatedFavItems = updatedUser.favouriteItems
   res.status(200).json({
     succes: true,
-    favouriteItems: USER.favouriteItems,
+    favouriteItems: updatedFavItems,
     message: "Favourite item deleted Successfully..",
   });
 });
@@ -532,8 +534,11 @@ const deleteAddressOfUser = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
+  const updatedUser = await User.findById(req.params.id).populate("favouriteItems.productId")
+  const updatedAddressBook = updatedUser.addressBook
   res.status(200).json({
     succes: true,
+    addressBook: updatedAddressBook,
     message: "Address deleted Successfully..",
   });
 });
