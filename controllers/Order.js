@@ -22,7 +22,6 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     itemsTotal,
     shippingPrice,
     totalPrice,
-    paidAt: Date.now(),
   });
 
   res.status(200).json({
@@ -34,8 +33,8 @@ const createOrder = catchAsyncErrors(async (req, res) => {
 // get all orders from all users --admin
 const getAllOrdersAdmin = catchAsyncErrors(async (req, res, next) => {
   const orders = await Order.find()
-    .populate("user", "name email")
-    .populate("orderItems.product", "name price disc image");
+    .populate("user")
+    .populate("orderItems.product");
 
   // calculate total amount of all orders
   let totalAmount = 0;
@@ -75,6 +74,9 @@ const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
 
   if (orderStatus === "Delivered") {
     order.deliveredAt = Date.now();
+    order.modifiedAt = Date.now()
+    order.paymentInfo.status = "Paid";
+    order.paidAt = Date.now()
   }
 
   await order.save({ validateBeforeSave: false });
@@ -101,8 +103,8 @@ const deleteOrder = catchAsyncErrors(async (req, res, next) => {
 // get all my orders --user
 const getAllOrdersUser = catchAsyncErrors(async (req, res, next) => {
   const myOrders = await Order.find({ user: req.params.id })
-    .populate("user", "name email")
-    .populate("orderItems.product", "name price disc image");
+    .populate("user")
+    .populate("orderItems.product");
 
   if (!myOrders) {
     return next(new ErrorHandler(`Sorry! we could not find any orders`, 400));
@@ -138,15 +140,15 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   res.status(200).json({
     success: true,
-    message: `Your order has been cancelled`,
+    message: `Your order has been cancelled successfully`,
   });
 });
 
 // get single order --both admin and user
 const getSingleOrder = catchAsyncErrors(async (req, res, next) => {
   const order = await Order.findById(req.params.id)
-    .populate("orderItems.product", "name price disc image")
-    .populate("user", "name email");
+    .populate("orderItems.product")
+    .populate("user");
   if (!order) {
     return next(new ErrorHandler(`Order not found`, 404));
   }

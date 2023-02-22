@@ -6,7 +6,7 @@ const crypto = require("crypto");
 
 const { Schema } = mongoose;
 
-const UserSchema = new Schema({
+const AdminSchema = new Schema({
   name: {
     type: String,
     required: [true, "Username must be provided"],
@@ -26,35 +26,18 @@ const UserSchema = new Schema({
     select: false,
   },
   avatar: {
-    public_id: { type: String, required: true },
-    url: { type: String, required: true },
+    public_id: { type: String, default: null },
+    url: { type: String, default: null },
   },
-  addressBook: [
-    {
-      streetAddress: { type: String, default: null },
-      floorOrApartment: { type: String, default: null },
-      city: { type: String, default: null },
-      postalCode: { type: Number, default: null },
-    },
-  ],
-  favouriteItems: [
-    {
-      productId: {
-        type: mongoose.Schema.ObjectId,
-        ref: "Product",
-        default: null,
-      },
-    },
-  ],
   isAdmin: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   resetPasswordToken: String,
   resetPasswordExpire: Date,
 });
 
-UserSchema.pre("save", async function (next) {
+AdminSchema.pre("save", async function (next) {
   if (!this.isModified("password")) {
     next();
   }
@@ -62,19 +45,19 @@ UserSchema.pre("save", async function (next) {
 });
 
 //JWT token
-UserSchema.methods.getJWTtoken = function () {
+AdminSchema.methods.getJWTtoken = function () {
   return jwt.sign({ id: this._id }, process.env.JWT_SECRET_KEY, {
     expiresIn: process.env.JWT_EXPIRE,
   });
 };
 
 // compare passwords
-UserSchema.methods.comparePassword = async function (enteredPassword) {
+AdminSchema.methods.comparePassword = async function (enteredPassword) {
   return await bcryptjs.compare(enteredPassword, this.password);
 };
 
 // password reset
-UserSchema.methods.getResetPasswordToken = function () {
+AdminSchema.methods.getResetPasswordToken = function () {
   // generate token
   const resetToken = crypto.randomBytes(20).toString("hex");
 
@@ -93,4 +76,4 @@ UserSchema.methods.getResetPasswordToken = function () {
   return resetToken;
 };
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("Admin", AdminSchema);

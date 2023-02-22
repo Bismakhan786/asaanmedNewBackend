@@ -35,13 +35,14 @@ const OrdersSchema = new Schema({
   ],
   user: {
     type: mongoose.Schema.ObjectId,
-    ref: 'User',
+    ref: 'MobileUser',
     required: true,
   },
+  
   paymentInfo: {
-    id: {
+    paymentType: {
       type: String,
-      required: true,
+      default: "Cash on delivery"
     },
     status: {
       type: String,
@@ -51,6 +52,7 @@ const OrdersSchema = new Schema({
   paidAt: {
     type: Date,
     required: true,
+    default: null
   },
   itemsTotal: {
     type: Number,
@@ -61,10 +63,6 @@ const OrdersSchema = new Schema({
     type: Number,
     required: true,
     default: 0,
-  },
-  voucher: {
-    type: mongoose.Schema.ObjectId,
-    default: null,
   },
   totalPrice: {
     type: Number,

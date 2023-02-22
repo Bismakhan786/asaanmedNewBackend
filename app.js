@@ -30,16 +30,14 @@ app.get("/", (req, res) => {
 
 //import router
 const product = require("./routes/Product");
-const user = require("./routes/User");
 const order = require("./routes/Order");
 const admin = require("./routes/Admin");
-const voucher = require("./routes/Voucher");
+const mobileUser = require("./routes/MobileUser")
 
 app.use("/api/v1/products", product);
-app.use("/api/v1/users", user);
 app.use("/api/v1/orders", order);
 app.use("/api/v1/admin", admin);
-app.use("/api/v1/vouchers", voucher);
+app.use("/api/v1/mobile/users", mobileUser)
 
 // middleware for errors
 app.use(errorMiddleware);

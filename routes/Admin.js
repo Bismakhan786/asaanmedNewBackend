@@ -22,33 +22,25 @@ const {
 } = require("../controllers/Product");
 const router = express.Router();
 
+const {getUserProfile, getAllUsers, deleteUser} = require("../controllers/MobileUser")
+
 const {
   adminLogin,
-  getAllUsers,
-  changeUserRole,
-  deleteUser,
-  logoutUser,
-  getOrdersAndReviewsOfUser,
+  adminLogout,
   getAdminProfile,
   updateAdminPassword,
-  updateUserPassword,
-  getUserProfile,
-} = require("../controllers/User");
-const {
-  getAllVouchers,
-  getSingleVoucher,
-  deleteVoucher,
-  updateVoucher,
-  createVoucher,
-} = require("../controllers/Voucher");
+  updateAdminProfile,
+  registerAdmin,
+} = require("../controllers/Admin");
 const { isAuthorizedAdmin, isAuthenticated } = require("../middleware/auth");
 
 // Authentication
+router.route("/register").post(registerAdmin);
 router.route("/login").post(adminLogin);
-router.route("/logout").get(logoutUser);
+router.route("/logout").get(adminLogout);
 router.route("/me").get(isAuthenticated, isAuthorizedAdmin, getAdminProfile);
 router.route('/update/password').put(isAuthenticated, isAuthorizedAdmin, updateAdminPassword);
-router.route('/update/profile').put(isAuthenticated, isAuthorizedAdmin, updateUserPassword);
+router.route('/update/profile').put(isAuthenticated, isAuthorizedAdmin, updateAdminProfile);
 
 // Products
 router.route("/products").get(getAllProducts);
@@ -75,32 +67,20 @@ router
   .route("/categories/new/create")
   .post(isAuthenticated, isAuthorizedAdmin, createCategory);
 
-// Vouchers
-
-router.route("/vouchers").get(getAllVouchers);
-router
-  .route("/vouchers/:id")
-  .get(isAuthenticated, isAuthorizedAdmin, getSingleVoucher)
-  .delete(isAuthenticated, isAuthorizedAdmin, deleteVoucher)
-  .put(isAuthenticated, isAuthorizedAdmin, updateVoucher);
-router
-  .route("/vouchers/new/create")
-  .post(isAuthenticated, isAuthorizedAdmin, createVoucher);
 
 // Orders
-router.route("/orders").get(getAllOrdersAdmin);
+router.route("/orders").get(isAuthenticated, isAuthorizedAdmin, getAllOrdersAdmin);
 router
   .route("/orders/:id")
   .put(isAuthenticated, isAuthorizedAdmin, updateOrderStatus)
   .delete(isAuthenticated, isAuthorizedAdmin, deleteOrder);
 
 // Users
-router.route("/users").get(getAllUsers);
-router.route("/users/ordersAndReviews/:id").get(isAuthenticated, isAuthorizedAdmin, getOrdersAndReviewsOfUser);
+router.route("/users").get(isAuthenticated, isAuthorizedAdmin, getAllUsers);
+router.route("/users/orders/:id").get(isAuthenticated, isAuthorizedAdmin, getAllOrdersUser); // id = user id
 router
   .route("/users/:id")
   .get(isAuthenticated, isAuthorizedAdmin, getUserProfile)
-  .put(isAuthenticated, isAuthorizedAdmin, changeUserRole)
   .delete(isAuthenticated, isAuthorizedAdmin, deleteUser);
 
 module.exports = router;

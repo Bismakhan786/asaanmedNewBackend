@@ -8,13 +8,19 @@ const ProductsSchema = new Schema({
     required: [true, "Product name must be provided"],
     trim: true,
   },
+  code: {
+    type: String,
+    required : [true, "Product code must be provided"],
+    trim: true
+  },
+  offer: {
+    type: Number,
+    required: [true, "Product offer must be provided"],
+    default: 0.0
+  },
   price: {
     type: Number,
     required: [true, "Product price must be provided"],
-  },
-  disc: {
-    type: Number,
-    default: 0.0
   },
   desc: {
     type: String,
@@ -28,39 +34,10 @@ const ProductsSchema = new Schema({
   },
   image: [
     {
-      public_id: { type: String, required: true },
-      url: { type: String, required: true },
+      public_id: { type: String, default: null },
+      url: { type: String, default: null },
     },
   ],
-  numOfReviews: {
-    type: Number,
-    default: 0
-  },
-  reviews: [
-    {
-      user: {
-        type: mongoose.Schema.ObjectId,
-        ref: 'User',
-        required: true,
-      },
-      name: {
-        type: String,
-        required: true
-      },
-      rating: {
-        type: Number,
-        default: 0,
-      },
-      comment: {
-        type: String,
-        required: true
-      },
-    },
-  ],
-  ratings: {
-    type: Number,
-    default: 0,
-  },
   status:{
     type: String,
     default: 'Available'
