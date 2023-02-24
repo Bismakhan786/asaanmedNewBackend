@@ -1,5 +1,6 @@
 const Order = require("../models/Order");
 const Product = require("../models/Product");
+const MobileUser = require("../models/MobileUser")
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
@@ -67,8 +68,16 @@ const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
   }
 
   order.orderItems.forEach(async (item) => {
-    await updateStock(item.product, item.qty);
+    await updateStockAndNumOfOrders(item.product, item.qty);
   });
+
+  const user = await MobileUser.findById(order.user)
+  if(!user) {
+    return next(new ErrorHandler(`User not found`, 404));
+
+  }
+  user.numOfOrders +=1
+  await user.save({ validateBeforeSave: false })
 
   order.orderStatus = orderStatus;
 
@@ -174,7 +183,7 @@ module.exports = {
 
 //================ HELPING FUNCTIONS =================================
 
-async function updateStock(productID, qty) {
+async function updateStockAndNumOfOrders(productID, qty) {
   const product = await Product.findById(productID);
   if (!product) {
     return next(new ErrorHandler(`Product not found`, 404));
@@ -183,6 +192,7 @@ async function updateStock(productID, qty) {
     return next(new ErrorHandler(`Failed, Insufficient stock!`, 400));
   }
   product.stock -= qty;
+  product.numOfOrders += 1
 
   await product.save({ validateBeforeSave: false });
 }

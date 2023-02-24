@@ -4,10 +4,13 @@ const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
 //get all users for admin only
 const getAllUsers = catchAsyncErrors(async (req, res) => {
+  const usersCount = await MobileUser.countDocuments();
+
   const users = await MobileUser.find();
   res.status(200).json({
     succes: true,
     users,
+    usersCount
   });
 });
 

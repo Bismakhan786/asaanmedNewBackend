@@ -15,6 +15,10 @@ const MobileUserSchema = new Schema({
     maxLength: [11, "Phone number cannot exceed 30 characters"],
     minLength: [11, "Phone number should be of 11 characters"],
   },
+  numOfOrders: {
+    type: Number,
+    default: 0
+  },
   addressBook: [
     {
       streetAddress: { type: String, default: null },
