@@ -71,10 +71,12 @@ const OrdersSchema = new Schema({
   },
   orderStatus: {
     type: String,
-    required: true,
+    enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
     default: "Processing",
   },
   deliveredAt: Date,
+  shippedAt: Date,
+  cancelledAt: Date,
   createdAt: {
     type: Date,
     default: Date.now(),

@@ -5,6 +5,7 @@ const {
   createCategory,
   deleteCategory,
   updateCategory,
+  deleteManyCategories,
 } = require("../controllers/Category");
 const {
   getAllOrdersAdmin,
@@ -12,6 +13,8 @@ const {
   deleteOrder,
   getSingleOrder,
   getAllOrdersUser,
+  updateManyOrderStatus,
+  deleteManyOrders,
 } = require("../controllers/Order");
 const {
   getAllProducts,
@@ -19,10 +22,14 @@ const {
   deleteAllProducts,
   updateOneProduct,
   deleteOneProduct,
+  deleteManyProducts,
+  updateStatusOfManyProducts,
+  updateStockOfManyProducts,
+  updateCategoryOfManyProducts
 } = require("../controllers/Product");
 const router = express.Router();
 
-const {getUserProfile, getAllUsers, deleteUser} = require("../controllers/MobileUser")
+const {getUserProfile, getAllUsers, deleteUser, blockMultipleUsers} = require("../controllers/MobileUser")
 
 const {
   adminLogin,
@@ -50,14 +57,21 @@ router
 router
   .route("/product/deleteAll")
   .delete(isAuthenticated, isAuthorizedAdmin, deleteAllProducts);
+router.route("/products/delete/many").put(isAuthenticated, isAuthorizedAdmin, deleteManyProducts)
 router
   .route("/product/modify/:id")
   .put(isAuthenticated, isAuthorizedAdmin, updateOneProduct)
   .delete(isAuthenticated, isAuthorizedAdmin, deleteOneProduct);
 
+  router.route("/products/update/status").put(isAuthenticated, isAuthorizedAdmin, updateStatusOfManyProducts)
+  router.route("/products/update/stock").put(isAuthenticated, isAuthorizedAdmin, updateStockOfManyProducts)
+  router.route("/products/update/category").put(isAuthenticated, isAuthorizedAdmin, updateCategoryOfManyProducts)
+
 // Categories
 
 router.route("/categories").get(getAllCategories);
+router.route("/categories/delete/many").put(isAuthenticated, isAuthorizedAdmin, deleteManyCategories)
+
 router
   .route("/categories/:id")
   .get(isAuthenticated, isAuthorizedAdmin, getSingleCategory)
@@ -70,6 +84,8 @@ router
 
 // Orders
 router.route("/orders").get(isAuthenticated, isAuthorizedAdmin, getAllOrdersAdmin);
+router.route("/orders/update/status/many").put(isAuthenticated, isAuthorizedAdmin, updateManyOrderStatus)
+router.route("/orders/delete/many").put(isAuthenticated, isAuthorizedAdmin, deleteManyOrders)
 router
   .route("/orders/:id")
   .put(isAuthenticated, isAuthorizedAdmin, updateOrderStatus)
@@ -77,6 +93,7 @@ router
 
 // Users
 router.route("/users").get(isAuthenticated, isAuthorizedAdmin, getAllUsers);
+router.route("/users/block").get(isAuthenticated, isAuthorizedAdmin, blockMultipleUsers);
 router.route("/users/orders/:id").get(isAuthenticated, isAuthorizedAdmin, getAllOrdersUser); // id = user id
 router
   .route("/users/:id")

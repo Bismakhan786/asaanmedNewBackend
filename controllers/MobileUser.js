@@ -2,6 +2,28 @@ const MobileUser = require("../models/MobileUser");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
 
+// Block multiple users
+const blockMultipleUsers = catchAsyncErrors(async (req, res) => {
+  const userids = req.body.userids;
+  userids.map(async (uid, i) => {
+    const user = await MobileUser.findById(uid);
+    if (!user) {
+      return next(new ErrorHandler(`User not found`, 400));
+    }
+
+    user.status = "Block";
+    await user.save();
+  });
+
+  const updatedUsers = await MobileUser.find()
+  const usersCount = await MobileUser.countDocuments();
+  res.status(200).json({
+    succes: true,
+    users: updatedUsers,
+    usersCount,
+  });
+});
+
 //get all users for admin only
 const getAllUsers = catchAsyncErrors(async (req, res) => {
   const usersCount = await MobileUser.countDocuments();
@@ -10,10 +32,9 @@ const getAllUsers = catchAsyncErrors(async (req, res) => {
   res.status(200).json({
     succes: true,
     users,
-    usersCount
+    usersCount,
   });
 });
-
 
 //delete user --for only admins
 const deleteUser = catchAsyncErrors(async (req, res, next) => {
@@ -44,38 +65,27 @@ const getUserProfile = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
-
 // register user
 const registerUser = catchAsyncErrors(async (req, res) => {
-  
-
   const { name, contact } = req.body;
 
-  let user = await MobileUser.findOne({contact})
+  let user = await MobileUser.findOne({ contact });
 
-
-  if(!user){
-
+  if (!user) {
     user = await MobileUser.create({
       name,
-      contact
+      contact,
     });
   }
 
-
   res.status(200).json({
     success: true,
-    user
-  })
+    user,
+  });
 });
-
-
 
 // update user profile
 const updateUserProfile = catchAsyncErrors(async (req, res, next) => {
-  
-
   const newUserData = {
     name: req.body.name,
     contact: req.body.contact,
@@ -116,7 +126,7 @@ const getFavouriteItemsOfUser = catchAsyncErrors(async (req, res, next) => {
 
 // UPDATE
 const insertFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
-  const  newItem  = {productId: req.body.productId};
+  const newItem = { productId: req.body.productId };
 
   const USER = await MobileUser.findById(req.params.id);
   if (!USER) {
@@ -154,8 +164,10 @@ const deleteFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
-  const updatedUser = await MobileUser.findById(req.params.id).populate("favouriteItems.productId")
-  const updatedFavItems = updatedUser.favouriteItems
+  const updatedUser = await MobileUser.findById(req.params.id).populate(
+    "favouriteItems.productId"
+  );
+  const updatedFavItems = updatedUser.favouriteItems;
   res.status(200).json({
     succes: true,
     favouriteItems: updatedFavItems,
@@ -234,13 +246,15 @@ const updateAddressOfUser = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler("User does not exist", 400));
   }
 
-  let index = USER.addressBook.findIndex(addr => addr._id.toString() === addressId.toString())
+  let index = USER.addressBook.findIndex(
+    (addr) => addr._id.toString() === addressId.toString()
+  );
   if (index === -1) {
     return next(new ErrorHandler("Address not exist", 400));
   }
 
-  let addressBook = USER.addressBook.slice()
-  addressBook.splice(index, 1, newAddress)
+  let addressBook = USER.addressBook.slice();
+  addressBook.splice(index, 1, newAddress);
 
   await MobileUser.findByIdAndUpdate(
     req.params.id,
@@ -252,8 +266,10 @@ const updateAddressOfUser = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
-  const updatedUser = await MobileUser.findById(req.params.id).populate("favouriteItems.productId")
-  const updatedAddressBook = updatedUser.addressBook
+  const updatedUser = await MobileUser.findById(req.params.id).populate(
+    "favouriteItems.productId"
+  );
+  const updatedAddressBook = updatedUser.addressBook;
   res.status(200).json({
     succes: true,
     addressBook: updatedAddressBook,
@@ -283,8 +299,10 @@ const deleteAddressOfUser = catchAsyncErrors(async (req, res, next) => {
     }
   );
 
-  const updatedUser = await MobileUser.findById(req.params.id).populate("favouriteItems.productId")
-  const updatedAddressBook = updatedUser.addressBook
+  const updatedUser = await MobileUser.findById(req.params.id).populate(
+    "favouriteItems.productId"
+  );
+  const updatedAddressBook = updatedUser.addressBook;
   res.status(200).json({
     succes: true,
     addressBook: updatedAddressBook,
@@ -324,5 +342,6 @@ module.exports = {
   deleteAllAddressesOfUser,
   // ADMIN
   getAllUsers,
-  deleteUser
+  deleteUser,
+  blockMultipleUsers
 };

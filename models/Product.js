@@ -40,7 +40,8 @@ const ProductsSchema = new Schema({
   ],
   status:{
     type: String,
-    default: 'Available'
+    enum: ["Available", "Unavailable"],
+    default: "Available"
   },
   stock: {
     type: Number,

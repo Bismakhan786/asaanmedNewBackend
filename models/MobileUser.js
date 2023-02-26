@@ -40,6 +40,11 @@ const MobileUserSchema = new Schema({
     type: Date,
     default: Date.now(),
   },
+  status: {
+    type: String,
+    enum: ["Active", "Block"],
+    default: "Active"
+  }
 });
 
 module.exports = mongoose.model("MobileUser", MobileUserSchema);
