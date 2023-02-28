@@ -40,7 +40,7 @@ const {
   registerAdmin,
 } = require("../controllers/Admin");
 const { isAuthorizedAdmin, isAuthenticated } = require("../middleware/auth");
-const { createMedia, deleteMedia, getAllMedia } = require("../controllers/Media");
+const { createMedia, deleteMedia, getAllMedia, deleteAllMedia } = require("../controllers/Media");
 
 // Authentication
 router.route("/register").post(registerAdmin);
@@ -105,5 +105,6 @@ router
 // Media
 router.route("/media/upload").post(isAuthenticated, isAuthorizedAdmin, createMedia)
 router.route("/media/delete/:id").delete(isAuthenticated, isAuthorizedAdmin, deleteMedia)
+router.route("/media/delete/all/images").delete(isAuthenticated, isAuthorizedAdmin, deleteAllMedia)
 router.route("/media").get(isAuthenticated, isAuthorizedAdmin, getAllMedia)
 module.exports = router;
