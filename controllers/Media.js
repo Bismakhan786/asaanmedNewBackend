@@ -44,10 +44,25 @@ const createMedia = catchAsyncErrors(async (req, res) => {
 //====================================== DELETE FUNCTIONS ======================================
 
 const deleteMedia = catchAsyncErrors(async (req, res, next) => {
-  const image = await Media.findByIdAndDelete(req.params.id);
+  const image = await Media.findById(req.params.id)
+  
   if (!image) {
     return next(new ErrorHandler(`Image ${req.params.id} not found`, 404));
   }
+
+  const myCloudResult = await cloudinary.v2.uploader.destroy(
+    image.public_id,
+    {
+      resource_type: "image",
+    }
+  );
+
+  if(myCloudResult.result !== "ok"){
+    return next(new ErrorHandler(`Image can't be deleted from cloudinary`, 404));
+
+  }
+
+  await image.remove()
 
   const media = await Media.find();
   const mediaCount = await Media.countDocuments();
@@ -59,7 +74,21 @@ const deleteAllMedia = catchAsyncErrors(async (req, res, next) => {
   const media = await Media.find();
 
   const deletedCount = await Media.countDocuments();
-  media.forEach(async (media) => await media.remove());
+  media.forEach(async (media) => {
+    const myCloudResult = await cloudinary.v2.uploader.destroy(
+      media.public_id,
+      {
+        resource_type: "image",
+      }
+    );
+  
+    if(myCloudResult.result !== "ok"){
+      return next(new ErrorHandler(`Image can't be deleted from cloudinary`, 404));
+  
+    }
+  
+    await media.remove()
+  });
 
   res
     .status(200)
