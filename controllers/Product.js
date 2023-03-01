@@ -87,12 +87,23 @@ const createProduct = catchAsyncErrors(async (req, res) => {
   let newProduct = {};
 
   if (req.body.image) {
-    const myCloud = await cloudinary.v2.uploader.upload(req.body.image, {
-      folder: "Products",
-      width: 150,
-      crop: "scale",
-      resource_type: "auto",
-    });
+    let public_id = "";
+    let url = "";
+    const imageRes = await Media.findOne({ url: req.body.image });
+    if (imageRes) {
+      public_id = imageRes.public_id;
+      url = imageRes.url;
+    } else {
+      const myCloud = await cloudinary.v2.uploader.upload(req.body.image, {
+        folder: "Products",
+        width: 150,
+        crop: "scale",
+        resource_type: "auto",
+      });
+
+      public_id = myCloud.public_id;
+      url = myCloud.url;
+    }
 
     newProduct = {
       name,
@@ -105,8 +116,8 @@ const createProduct = catchAsyncErrors(async (req, res) => {
       stock,
       image: [
         {
-          public_id: myCloud.public_id,
-          url: myCloud.url,
+          public_id: public_id,
+          url: url,
         },
       ],
       createdBy,
