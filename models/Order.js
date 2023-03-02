@@ -51,7 +51,6 @@ const OrdersSchema = new Schema({
   },
   paidAt: {
     type: Date,
-    required: true,
     default: null
   },
   itemsTotal: {
