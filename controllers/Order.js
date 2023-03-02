@@ -25,7 +25,8 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     totalPrice,
   });
 
-  const myOrders = await Order.find({})
+  const myOrders = await Order.find().populate("orderItems.product")
+  .populate("user");
   res.status(200).json({
     success: true,
     myOrders,
@@ -286,7 +287,8 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   await order.save();
 
-  const myOrders = await Order.find()
+  const myOrders = await Order.find().populate("orderItems.product")
+  .populate("user");
 
   res.status(200).json({
     success: true,
