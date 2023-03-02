@@ -25,9 +25,10 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     totalPrice,
   });
 
+  const myOrders = await Order.find({})
   res.status(200).json({
     success: true,
-    order,
+    myOrders,
   });
 });
 
@@ -272,11 +273,12 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   if (order.orderStatus === "Processing") {
     order.orderStatus = "Cancelled";
+    order.cancelledAt = Date.now()
     order.modifiedAt = Date.now();
   } else {
     return next(
       new ErrorHandler(
-        `Once the order has been processed and shipped then it cannot be cancelled`,
+        `Once the order has been shipped then it cannot be cancelled`,
         400
       )
     );
@@ -284,8 +286,11 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   await order.save();
 
+  const myOrders = await Order.find()
+
   res.status(200).json({
     success: true,
+    myOrders,
     message: `Your order has been cancelled successfully`,
   });
 });
