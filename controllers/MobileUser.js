@@ -192,9 +192,10 @@ const deleteAllFavouriteItemsOfUser = catchAsyncErrors(
     }
 
     USER.favouriteItems = [];
-    USER.save();
+    await USER.save();
     res.status(200).json({
       succes: true,
+      favouriteItems: [],
       message: "Favourite Items deleted successfully..",
     });
   }
