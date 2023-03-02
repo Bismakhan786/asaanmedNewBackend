@@ -67,7 +67,9 @@ const getUserProfile = catchAsyncErrors(async (req, res, next) => {
 
 // register user
 const registerUser = catchAsyncErrors(async (req, res) => {
-  const { name, contact } = req.body;
+  console.log(req.body)
+
+  const { name, contact, addressBook } = req.body;
 
   let user = await MobileUser.findOne({ contact });
 
@@ -75,6 +77,7 @@ const registerUser = catchAsyncErrors(async (req, res) => {
     user = await MobileUser.create({
       name,
       contact,
+      addressBook
     });
   }
 
