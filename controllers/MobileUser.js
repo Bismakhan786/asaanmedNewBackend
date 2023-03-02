@@ -139,9 +139,14 @@ const insertFavouriteItemOfUser = catchAsyncErrors(async (req, res, next) => {
   USER.favouriteItems.push(newItem);
 
   USER.save();
+
+  const updatedUser = await MobileUser.findById(req.params.id).populate(
+    "favouriteItems.productId"
+  );
+  const updatedFavItems = updatedUser.favouriteItems;
   res.status(200).json({
     succes: true,
-    favouriteItems: USER.favouriteItems,
+    favouriteItems: updatedFavItems,
   });
 });
 
