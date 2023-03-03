@@ -68,6 +68,7 @@ const sendEmail = async ({
           if (err) {
             return console.log("Error occurs", err.message);
           } else {
+            transporter.close()
             return console.log("Email sent");
           }
         });
