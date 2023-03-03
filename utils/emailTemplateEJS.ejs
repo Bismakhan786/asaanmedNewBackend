@@ -19,25 +19,25 @@
                 </th>
             </thead>
             <tbody>
-                <% orderItems.map((item , index) => (%>
+                <% orderItems.map((item , index) => ( %>
                  <tr style="border-bottom: 1px solid rgba(0, 0, 0, 0.8); padding-bottom: 5px; margin-bottom: 5px;">
-                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.product%></td>
-                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.qty%></td>
-                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.price%></td>
-                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.offer%></td>
-                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.total%></td>
+                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.product %></td>
+                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.qty %></td>
+                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.price %></td>
+                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.offer %></td>
+                    <td style="text-align: left; padding-left: 5px; padding-right: 5px;"><%= item.total %></td>
                 </tr>
-                <%))%>
+                <% )) %>
             </tbody>
         </table>
     
-        <h3>Total: <%=orderTotal%></h3>
+        <h3>Total: <%= orderTotal %></h3>
         <h5>Shipping Details</h5>
-        <p><%= streetAddres%></p>
-       <p><%=floorOrApartment%></p>
-       <p><%=city%></p>
-       <p><%=postalCode%></p>
+        <p><%= streetAddres %></p>
+       <p><%= floorOrApartment %></p>
+       <p><%= city %></p>
+       <p><%= postalCode %></p>
        <h5>Payment Details</h5>
-        <p><%=paymentType%></p>
-        <p><%=paymentStatus%></p>
+        <p><%= paymentType %></p>
+        <p><%= paymentStatus %></p>
 </container>
