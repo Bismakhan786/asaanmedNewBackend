@@ -1,6 +1,6 @@
 const nodeMailer = require("nodemailer");
-const ejs = require('ejs')
-const path = require('path')
+const ejs = require("ejs");
+const path = require("path");
 
 const sendEmail = async ({
   orderId,
@@ -15,14 +15,15 @@ const sendEmail = async ({
   postalCode,
   paymentType,
   paymentStatus,
-  orderItems = [{
-    product: "",
-    qty: "",
-    price: "",
-    offer: "",
-    total: ""
-  }],
-  
+  orderItems = [
+    {
+      product: "",
+      qty: "",
+      price: "",
+      offer: "",
+      total: "",
+    },
+  ],
 }) => {
   const transporter = nodeMailer.createTransport({
     host: process.env.SMTP_HOST,
@@ -34,36 +35,73 @@ const sendEmail = async ({
     },
   });
 
-  const templatePath = path.join(__dirname, "./emailTemplateEJS.ejs")
-  const data = await ejs.renderFile(templatePath, {
-    orderId,
-    orderDate,
-    customerName,
-    customerContact,
-    orderTotal,
-    streetAddress,
-    floorOrApartment,
-    city,
-    postalCode,
-    paymentType,
-    paymentStatus,
-    orderItems
-  })
-
-  const msg = {
-    from: `"ASAANMED" ${process.env.SMTP_MAIL}`,
-    to: process.env.ADMIN_EMAIL,
-    subject: orderStatus === "Cancelled" ? "ORDER CANCELLED" : "NEW ORDER",
-    html: data,
-  };
-
-  await transporter.sendMail(msg, (err) => {
-    if (err) {
-      return console.log("Error occurs", err);
-    } else {
-      return console.log("Email sent");
+  const templatePath = path.join(__dirname, "./emailTemplateEJS.ejs");
+  ejs.renderFile(
+    templatePath,
+    {
+      orderId,
+      orderDate,
+      customerName,
+      customerContact,
+      orderTotal,
+      streetAddress,
+      floorOrApartment,
+      city,
+      postalCode,
+      paymentType,
+      paymentStatus,
+      orderItems,
+    },
+    function (err, data) {
+      if (err) {
+        return console.log("Error occurs", err.message);
+      } else {
+        const msg = {
+          from: `"ASAANMED" ${process.env.SMTP_MAIL}`,
+          to: process.env.ADMIN_EMAIL,
+          subject:
+            orderStatus === "Cancelled" ? "ORDER CANCELLED" : "NEW ORDER",
+          html: data,
+        };
+        transporter.sendMail(msg, (err) => {
+          if (err) {
+            return console.log("Error occurs", err.message);
+          } else {
+            return console.log("Email sent");
+          }
+        });
+      }
     }
-  });
+  );
+  // const data = await ejs.renderFile(templatePath, {
+  //   orderId,
+  //   orderDate,
+  //   customerName,
+  //   customerContact,
+  //   orderTotal,
+  //   streetAddress,
+  //   floorOrApartment,
+  //   city,
+  //   postalCode,
+  //   paymentType,
+  //   paymentStatus,
+  //   orderItems
+  // })
+
+  // const msg = {
+  //   from: `"ASAANMED" ${process.env.SMTP_MAIL}`,
+  //   to: process.env.ADMIN_EMAIL,
+  //   subject: orderStatus === "Cancelled" ? "ORDER CANCELLED" : "NEW ORDER",
+  //   html: data,
+  // };
+
+  // await transporter.sendMail(msg, (err) => {
+  //   if (err) {
+  //     return console.log("Error occurs", err);
+  //   } else {
+  //     return console.log("Email sent");
+  //   }
+  // });
 };
 
 module.exports = sendEmail;
