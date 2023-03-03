@@ -14,6 +14,7 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     itemsTotal,
     shippingPrice,
     totalPrice,
+    orderStatus
   } = req.body;
 
   const order = await Order.create({
@@ -24,6 +25,7 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     itemsTotal,
     shippingPrice,
     totalPrice,
+    orderStatus
   });
 
   const user = await MobileUser.findById(req.params.id);
