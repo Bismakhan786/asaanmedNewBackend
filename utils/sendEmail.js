@@ -71,7 +71,6 @@ const sendEmail = async ({
             return console.log("Email sent");
           }
         });
-        transporter.close()
       }
     }
   );
