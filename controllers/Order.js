@@ -3,6 +3,7 @@ const Product = require("../models/Product");
 const MobileUser = require("../models/MobileUser");
 const ErrorHandler = require("../utils/errorHandler");
 const catchAsyncErrors = require("../middleware/catchAsyncErrors");
+const sendEmail = require("../utils/sendEmail");
 
 // create order
 const createOrder = catchAsyncErrors(async (req, res) => {
@@ -25,8 +26,43 @@ const createOrder = catchAsyncErrors(async (req, res) => {
     totalPrice,
   });
 
-  const myOrders = await Order.find().populate("orderItems.product")
-  .populate("user");
+  const user = await MobileUser.findById(req.params.id);
+
+  const newOrder = await Order.findById(order._id).populate(
+    "orderItems.product"
+  );
+  let orderItemsNew = [];
+  newOrder.orderItems.map((item, index) => {
+    orderItemsNew.push({
+      product: item.product.name,
+      qty: item.qty,
+      price: item.product.price,
+      offer: item.product.offer,
+      total:
+        (item.product.price - item.product.price * (item.product.offer / 100)) *
+        item.qty,
+    });
+  });
+
+  await sendEmail({
+    orderId: order._id,
+    orderDate: order.createdAt,
+    customerName: user.name,
+    customerContact: user.contact,
+    orderTotal: totalPrice,
+    streetAddress: order.shippingInfo.streetAddress,
+    floorOrApartment: order.shippingInfo.floorOrApartment,
+    city: order.shippingInfo.city,
+    postalCode: order.shippingInfo.postalCode,
+    paymentType: order.paymentInfo.paymentType,
+    paymentStatus: order.paymentInfo.status,
+    orderItems: orderItemsNew,
+    orderStatus: order.orderStatus,
+  });
+
+  const myOrders = await Order.find()
+    .populate("orderItems.product")
+    .populate("user");
   res.status(200).json({
     success: true,
     myOrders,
@@ -58,13 +94,11 @@ const getAllOrdersAdmin = catchAsyncErrors(async (req, res, next) => {
 
 // update many order status --admin
 const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
-  
-  let orderids = []
-  let orderStatus = ""
+  let orderids = [];
+  let orderStatus = "";
 
-  orderids = req.body.orderids
-  orderStatus = req.body.orderStatus
-
+  orderids = req.body.orderids;
+  orderStatus = req.body.orderStatus;
 
   for (let i = 0; i < orderids.length; i++) {
     const order = await Order.findById(orderids[i]);
@@ -76,8 +110,7 @@ const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
       order.shippedAt = Date.now();
       order.modifiedAt = Date.now();
       order.orderItems.forEach(async (item) => {
-
-        const product = await Product.findById(item.product)
+        const product = await Product.findById(item.product);
 
         if (!product) {
           return next(new ErrorHandler(`Product not found`, 404));
@@ -93,28 +126,27 @@ const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
 
       const user = await MobileUser.findById(order.user);
       if (!user) {
-        return next(new ErrorHandler(`User not found`, 404))
+        return next(new ErrorHandler(`User not found`, 404));
       }
       user.numOfOrders += 1;
       await user.save({ validateBeforeSave: false });
     }
 
-    if(order.orderStatus === "Delivered"){
+    if (order.orderStatus === "Delivered") {
       order.deliveredAt = Date.now();
-        order.modifiedAt = Date.now();
-        order.paymentInfo.status = "Paid";
-        order.paidAt = Date.now();
-        order.orderStatus = "Delivered";
+      order.modifiedAt = Date.now();
+      order.paymentInfo.status = "Paid";
+      order.paidAt = Date.now();
+      order.orderStatus = "Delivered";
       await order.save({ validateBeforeSave: false });
     }
 
-    if(order.orderStatus === "Cancelled"){
-      order.cancelledAt = Date.now()
-      order.modifiedAt = Date.now()
-      order.orderStatus = "Cancelled"
+    if (order.orderStatus === "Cancelled") {
+      order.cancelledAt = Date.now();
+      order.modifiedAt = Date.now();
+      order.orderStatus = "Cancelled";
       await order.save({ validateBeforeSave: false });
     }
-
   }
 
   const orders = await Order.find()
@@ -135,7 +167,7 @@ const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
     orders,
     totalAmount,
     ordersCount,
-    updatedCount: orderids.length
+    updatedCount: orderids.length,
   });
 });
 
@@ -184,18 +216,16 @@ const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
-
 // delete many order --admin
 const deleteManyOrders = catchAsyncErrors(async (req, res, next) => {
-  
-  let orderids = []
-  orderids = req.body.orderids
+  let orderids = [];
+  orderids = req.body.orderids;
 
-  for(let i = 0; i< orderids.length; i++){
+  for (let i = 0; i < orderids.length; i++) {
     const order = await Order.findByIdAndDelete(orderids[i]);
-  if (!order) {
-    return next(new ErrorHandler(`Order not found`, 404));
-  }
+    if (!order) {
+      return next(new ErrorHandler(`Order not found`, 404));
+    }
   }
 
   const orders = await Order.find()
@@ -216,7 +246,7 @@ const deleteManyOrders = catchAsyncErrors(async (req, res, next) => {
     orders,
     totalAmount,
     ordersCount,
-    deletedCount: orderids.length
+    deletedCount: orderids.length,
   });
 });
 
@@ -266,7 +296,9 @@ const getAllOrdersUser = catchAsyncErrors(async (req, res, next) => {
 
 // cancel order --user
 const cancelOrder = catchAsyncErrors(async (req, res, next) => {
-  const order = await Order.findById(req.params.id);
+  const order = await Order.findById(req.params.id).populate(
+    "orderItems.product"
+  );
 
   if (!order) {
     return next(new ErrorHandler(`Order ${req.params.id} not found`, 400));
@@ -274,7 +306,7 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
 
   if (order.orderStatus === "Processing") {
     order.orderStatus = "Cancelled";
-    order.cancelledAt = Date.now()
+    order.cancelledAt = Date.now();
     order.modifiedAt = Date.now();
   } else {
     return next(
@@ -284,11 +316,42 @@ const cancelOrder = catchAsyncErrors(async (req, res, next) => {
       )
     );
   }
+  const user = await MobileUser.findById(order.user);
 
   await order.save();
 
-  const myOrders = await Order.find().populate("orderItems.product")
-  .populate("user");
+  let orderItemsNew = [];
+  order.orderItems.map((item, index) => {
+    orderItemsNew.push({
+      product: item.product.name,
+      qty: item.qty,
+      price: item.product.price,
+      offer: item.product.offer,
+      total:
+        (item.product.price - item.product.price * (item.product.offer / 100)) *
+        item.qty,
+    });
+  });
+
+  await sendEmail({
+    orderId: order._id,
+    orderDate: order.createdAt,
+    customerName: user.name,
+    customerContact: user.contact,
+    orderTotal: order.totalPrice,
+    streetAddress: order.shippingInfo.streetAddress,
+    floorOrApartment: order.shippingInfo.floorOrApartment,
+    city: order.shippingInfo.city,
+    postalCode: order.shippingInfo.postalCode,
+    paymentType: order.paymentInfo.paymentType,
+    paymentStatus: order.paymentInfo.status,
+    orderItems: orderItemsNew,
+    orderStatus: order.orderStatus,
+  });
+
+  const myOrders = await Order.find()
+    .populate("orderItems.product")
+    .populate("user");
 
   res.status(200).json({
     success: true,
@@ -331,7 +394,7 @@ module.exports = {
 
 async function updateStockAndNumOfOrders(productID, qty) {
   const product = await Product.findById(productID);
-  
+
   product.stock -= qty;
   product.numOfOrders += 1;
 
