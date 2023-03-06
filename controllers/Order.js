@@ -79,7 +79,7 @@ const getAllOrdersAdmin = catchAsyncErrors(async (req, res, next) => {
 
   // calculate total amount of all orders
   let totalAmount = 0;
-  orders.forEach((order) => {
+  orders.filter((o) => o.orderStatus === "Delivered").forEach((order) => {
     totalAmount += order.totalPrice;
   });
 
@@ -117,7 +117,7 @@ const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
         if (!product) {
           return next(new ErrorHandler(`Product not found`, 404));
         }
-        if (product.stock < qty) {
+        if (product.stock < item.qty) {
           return next(new ErrorHandler(`Failed, Insufficient stock!`, 400));
         }
 
@@ -157,7 +157,7 @@ const updateManyOrderStatus = catchAsyncErrors(async (req, res, next) => {
 
   // calculate total amount of all orders
   let totalAmount = 0;
-  orders.forEach((order) => {
+  orders.filter((o) => o.orderStatus === "Delivered").forEach((order) => {
     totalAmount += order.totalPrice;
   });
 
@@ -190,27 +190,47 @@ const updateOrderStatus = catchAsyncErrors(async (req, res, next) => {
     return next(new ErrorHandler(`This is a cancelled order`, 400));
   }
 
-  order.orderItems.forEach(async (item) => {
-    await updateStockAndNumOfOrders(item.product, item.qty);
-  });
+  if (orderStatus === "Shipped") {
+    order.shippedAt = Date.now();
+    order.modifiedAt = Date.now();
+    order.orderItems.forEach(async (item) => {
+      const product = await Product.findById(item.product);
 
-  const user = await MobileUser.findById(order.user);
-  if (!user) {
-    return next(new ErrorHandler(`User not found`, 404));
+      if (!product) {
+        return next(new ErrorHandler(`Product not found`, 404));
+      }
+      if (product.stock < item.qty) {
+        return next(new ErrorHandler(`Failed, Insufficient stock!`, 400));
+      }
+
+      await updateStockAndNumOfOrders(item.product, item.qty);
+    });
+    order.orderStatus = "Shipped";
+    await order.save({ validateBeforeSave: false });
+
+    const user = await MobileUser.findById(order.user);
+    if (!user) {
+      return next(new ErrorHandler(`User not found`, 404));
+    }
+    user.numOfOrders += 1;
+    await user.save({ validateBeforeSave: false });
   }
-  user.numOfOrders += 1;
-  await user.save({ validateBeforeSave: false });
-
-  order.orderStatus = orderStatus;
 
   if (orderStatus === "Delivered") {
     order.deliveredAt = Date.now();
     order.modifiedAt = Date.now();
     order.paymentInfo.status = "Paid";
     order.paidAt = Date.now();
+    order.orderStatus = "Delivered";
+    await order.save({ validateBeforeSave: false });
   }
 
-  await order.save({ validateBeforeSave: false });
+  if (orderStatus === "Cancelled") {
+    order.cancelledAt = Date.now();
+    order.modifiedAt = Date.now();
+    order.orderStatus = "Cancelled";
+    await order.save({ validateBeforeSave: false });
+  }
 
   res.status(200).json({
     success: true,
@@ -236,7 +256,7 @@ const deleteManyOrders = catchAsyncErrors(async (req, res, next) => {
 
   // calculate total amount of all orders
   let totalAmount = 0;
-  orders.forEach((order) => {
+  orders.filter((o) => o.orderStatus === "Delivered").forEach((order) => {
     totalAmount += order.totalPrice;
   });
 
@@ -265,7 +285,7 @@ const deleteOrder = catchAsyncErrors(async (req, res, next) => {
 
   // calculate total amount of all orders
   let totalAmount = 0;
-  orders.forEach((order) => {
+  orders.filter((o) => o.orderStatus === "Delivered").forEach((order) => {
     totalAmount += order.totalPrice;
   });
 
