@@ -7,7 +7,7 @@ const fileupload = require("express-fileupload");
 
 app.use(
   cors({
-    origin: ['http://localhost:3000' , 'http://10.0.2.2:4000','exp://192.168.100.8:19000'],
+    origin: ["https://amused-peplum-boa.cyclic.app", 'http://localhost:3000' , 'http://10.0.2.2:4000','exp://192.168.100.8:19000'],
     credentials: true
   })
 );
